@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import { setPrimaryColor } from "./setting-repository";
 
 export default class WebviewLoader implements vscode.Disposable {
     private readonly _panel: vscode.WebviewPanel | undefined;
@@ -27,7 +28,12 @@ export default class WebviewLoader implements vscode.Disposable {
                     const resMessage = {...message, payload: data};
                     await this.respondToMessage(resMessage);
                     break;
-            }
+                case "updatePrimaryColor":
+                    console.debug(message.payload);
+                    const colorCode = JSON.parse(message.payload as string);
+                    setPrimaryColor(colorCode);
+                    break;
+            } 
         });
 
         this._panel.webview.html = this.getWebviewContent(this._panel.webview);
