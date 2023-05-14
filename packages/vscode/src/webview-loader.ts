@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { setPrimaryColor } from "./setting-repository";
+import { getPrimaryColor, setPrimaryColor } from "./setting-repository";
 
 export default class WebviewLoader implements vscode.Disposable {
     private readonly _panel: vscode.WebviewPanel | undefined;
@@ -29,9 +29,10 @@ export default class WebviewLoader implements vscode.Disposable {
                     await this.respondToMessage(resMessage);
                     break;
                 case "updatePrimaryColor":
-                    console.debug(message.payload);
                     const colorCode = JSON.parse(message.payload as string);
-                    setPrimaryColor(colorCode.primary);
+                    if (colorCode.primary) {
+                        setPrimaryColor(colorCode.primary);
+                    } 
                     break;
             } 
         });
@@ -56,6 +57,8 @@ export default class WebviewLoader implements vscode.Disposable {
         const reactAppUri = webview.asWebviewUri(reactAppPathOnDisk);
         // const reactAppUri = reactAppPathOnDisk.with({ scheme: "vscode-resource" });
 
+        const primaryColor = getPrimaryColor();
+
         const returnString = `
             <!DOCTYPE html>
             <html lang="en">
@@ -64,7 +67,8 @@ export default class WebviewLoader implements vscode.Disposable {
                     <meta name="viewport" content="initial-scale=1.0">
                     <title>githru-vscode-ext webview</title>
                     <script>
-                        window.isProduction = true;
+                        window.isProduction = true;   
+                        window.primaryColor = "${primaryColor}";                     
                     </script>
                 </head>
                 <body>
